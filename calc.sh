@@ -80,6 +80,7 @@ while true; do
         calculate "$input"
         if [ $? -eq 0 ]; then
             read -s -n 1
+            
             clear
         fi
     fi
