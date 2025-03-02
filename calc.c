@@ -1,8 +1,8 @@
 #include "calc.h"
-#define ANS_FILE getenv("HOME") ? strcat(getenv("HOME"), "/.calc_ans") : ".calc_ans"
-#define HIST_FILE getenv("HOME") ? strcat(getenv("HOME"), "/.calc_history") : ".calc_history"
+#define ANS_FILE (getenv("HOME") ? strcat(strcpy(malloc(strlen(getenv("HOME")) + 12), getenv("HOME")), "/.calc_ans") : ".calc_ans")
+#define HIST_FILE (getenv("HOME") ? strcat(strcpy(malloc(strlen(getenv("HOME")) + 16), getenv("HOME")), "/.calc_history") : ".calc_history")
 
-void save_ans(long double ans)
+void save_ans(double ans)
 {
     FILE *file = fopen(ANS_FILE, "w");
     if (file)
@@ -12,9 +12,9 @@ void save_ans(long double ans)
     }
 }
 
-long double get_ans()
+double get_ans()
 {
-    long double ans = 0.0;
+    double ans = 0.0;
     FILE *file = fopen(ANS_FILE, "r");
     if (file)
     {
@@ -38,7 +38,7 @@ void save_history(const char *entry)
     {
         while (fgets(history[count], MAX_LINE, file) && count < HIST_SIZE)
         {
-            history[count][strcspn(history[count], "\n")] = 0; // Loại bỏ newline
+            history[count][strcspn(history[count], "\n")] = 0;
             count++;
         }
         fclose(file);
@@ -74,7 +74,7 @@ void show_history()
     }
 }
 
-int is_valid_input(const char *input, long double *num1, char *oper, long double *num2)
+int is_valid_input(const char *input, double *num1, char *oper, double *num2)
 {
     char temp[MAX_LINE];
     strcpy(temp, input);
@@ -133,7 +133,7 @@ int is_valid_input(const char *input, long double *num1, char *oper, long double
     return 1;
 }
 
-long double calculate_result(long double num1, char oper, long double num2, char *error_msg)
+double calculate_result(double num1, char oper, double num2, char *error_msg)
 {
     switch (oper)
     {
@@ -171,7 +171,7 @@ void clear_screen()
 int main()
 {
     char input[MAX_LINE];
-    long double num1, num2, result;
+    double num1, num2, result;
     char oper, error_msg[MAX_LINE] = "";
 
     while (1)
@@ -217,7 +217,7 @@ int main()
                     result = calculate_result(num1, oper, num2, error_msg);
                     if (strcmp(error_msg, "") == 0)
                     {
-                        result = (long double)((long long)(result * 100 + 0.5)) / 100.0;
+                        result = (double)((long long)(result * 100 + 0.5)) / 100.0;
                         if (result == (long long)result)
                         {
                             printf("%lld\n", (long long)result);
