@@ -1,22 +1,11 @@
-TARGET_EXEC := calc
+CC=gcc
+CFLAGS=-Wall -Wextra -std=c99
+TARGET=calc
 
-SRC_DIRS := .
+all: $(TARGET)
 
-SRCS := calc.c
+$(TARGET): calc.c
+	$(CC) $(CFLAGS) -o $(TARGET) calc.c
 
-OBJS := $(SRCS:.c=.o)
-
-CFLAGS := -g -Wall
-
-$(TARGET_EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-.PHONY: clean
 clean:
-	rm -f $(OBJS) $(TARGET_EXEC)
-
-.PHONY: all
-all: $(TARGET_EXEC)
+	rm -f $(TARGET) calc_ans.txt calc_history.txt
