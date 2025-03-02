@@ -2,33 +2,34 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <float.h>
 
-#define ANS_FILE "calc_ans.txt"
-#define HIST_FILE "calc_history.txt"
-#define MAX_HISTORY 5
-#define MAX_INPUT 100
-#define MAX_VALUE 1e9
+#define ANS_FILE "/tmp/.calc_ans"
+#define HIST_FILE "/tmp/.calc_history"
+#define MAX_VALUE 1000000000
+#define INPUT_SIZE 100
+
+double ANS = 0;
 
 void save_history(const char *entry) {
     FILE *file = fopen(HIST_FILE, "r");
-    char history[MAX_HISTORY][MAX_INPUT];
+    char history[5][INPUT_SIZE] = {0};
     int count = 0;
+
     if (file) {
-        while (count < MAX_HISTORY - 1 && fgets(history[count], sizeof(history[count]), file)) {
-            history[count][strcspn(history[count], "\n")] = 0;
+        while (count < 5 && fgets(history[count], INPUT_SIZE, file)) {
             count++;
         }
         fclose(file);
     }
-    
+
     file = fopen(HIST_FILE, "w");
-    if (!file) return;
-    fprintf(file, "%s\n", entry);
-    for (int i = 0; i < count; i++) {
-        fprintf(file, "%s\n", history[i]);
+    if (file) {
+        fprintf(file, "%s\n", entry);
+        for (int i = 0; i < count; i++) {
+            fprintf(file, "%s", history[i]);
+        }
+        fclose(file);
     }
-    fclose(file);
 }
 
 void show_history() {
@@ -37,88 +38,92 @@ void show_history() {
         printf("No history available\n");
         return;
     }
-    char line[MAX_INPUT];
-    while (fgets(line, sizeof(line), file)) {
+    char line[INPUT_SIZE];
+    while (fgets(line, INPUT_SIZE, file)) {
         printf("%s", line);
     }
     fclose(file);
 }
 
-double get_ans() {
-    FILE *file = fopen(ANS_FILE, "r");
-    double ans = 0;
-    if (file) {
-        fscanf(file, "%lf", &ans);
-        fclose(file);
+int is_number(const char *s) {
+    while (*s) {
+        if (!isdigit(*s) && *s != '.' && *s != '-') {
+            return 0;
+        }
+        s++;
     }
-    return ans;
+    return 1;
 }
 
-void save_ans(double ans) {
-    FILE *file = fopen(ANS_FILE, "w");
-    if (file) {
-        fprintf(file, "%.2f", ans);
-        fclose(file);
-    }
-}
-
-void calculate(char *input) {
-    double num1, num2, res = 0;
+void calculate(const char *input) {
+    double num1, num2, result = 0;
     char oper;
-    if (strlen(input) >= MAX_INPUT - 1) {
-        printf("INPUT ERROR: Input too long!\n");
-        return;
-    }
+
     if (sscanf(input, "%lf %c %lf", &num1, &oper, &num2) != 3) {
         printf("SYNTAX ERROR\n");
         return;
     }
+
     if (num1 > MAX_VALUE || num2 > MAX_VALUE) {
         printf("VALUE ERROR: Number too large!\n");
         return;
     }
-    if (oper == '/' && num2 == 0) {
-        printf("MATH ERROR\n");
-        return;
-    }
+
     switch (oper) {
-        case '+': res = num1 + num2; break;
-        case '-': res = num1 - num2; break;
-        case 'x': res = num1 * num2; break;
-        case '/': res = num1 / num2; break;
-        case '%': res = (int)num1 % (int)num2; break;
-        default: printf("SYNTAX ERROR\n"); return;
+        case '+': result = num1 + num2; break;
+        case '-': result = num1 - num2; break;
+        case 'x': result = num1 * num2; break;
+        case '/':
+            if (num2 == 0) {
+                printf("MATH ERROR: Division by zero!\n");
+                return;
+            }
+            result = num1 / num2;
+            break;
+        case '%':
+            if ((int)num2 == 0) {
+                printf("MATH ERROR: Modulo by zero!\n");
+                return;
+            }
+            result = (int)num1 % (int)num2;
+            break;
+        default:
+            printf("SYNTAX ERROR\n");
+            return;
     }
-    if (res > MAX_VALUE) {
+
+    if (result > MAX_VALUE) {
         printf("VALUE ERROR: Result too large!\n");
         return;
     }
-    printf("%.2f\n", res);
-    save_ans(res);
-    char entry[MAX_INPUT];
-    snprintf(entry, sizeof(entry), "%.2f %c %.2f = %.2f", num1, oper, num2, res);
-    save_history(entry);
+
+    ANS = result;
+    printf("= %.2lf\n", result);
+
+    char history_entry[INPUT_SIZE];
+    snprintf(history_entry, sizeof(history_entry), "%.2lf %c %.2lf = %.2lf", num1, oper, num2, result);
+    save_history(history_entry);
 }
 
 int main() {
-    char input[MAX_INPUT];
+    char input[INPUT_SIZE];
+
     while (1) {
         printf(">> ");
         if (!fgets(input, sizeof(input), stdin)) {
-            printf("INPUT ERROR: Failed to read input!\n");
-            continue;
+            break;
         }
+
         input[strcspn(input, "\n")] = 0;
-        if (strlen(input) >= MAX_INPUT - 1) {
-            printf("INPUT ERROR: Input too long!\n");
-            continue;
-        }
-        if (strcmp(input, "EXIT") == 0) break;
-        if (strcmp(input, "HIST") == 0) {
+
+        if (strcmp(input, "EXIT") == 0) {
+            break;
+        } else if (strcmp(input, "HIST") == 0) {
             show_history();
-            continue;
+        } else {
+            calculate(input);
         }
-        calculate(input);
     }
+
     return 0;
 }
