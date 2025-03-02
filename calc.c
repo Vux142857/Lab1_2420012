@@ -1,5 +1,4 @@
 #include "calc.h"
-
 #define ANS_FILE getenv("HOME") ? strcat(getenv("HOME"), "/.calc_ans") : ".calc_ans"
 #define HIST_FILE getenv("HOME") ? strcat(getenv("HOME"), "/.calc_history") : ".calc_history"
 
