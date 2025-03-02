@@ -2,7 +2,7 @@
 #define ANS_FILE (getenv("HOME") ? strcat(strcpy(malloc(strlen(getenv("HOME")) + 12), getenv("HOME")), "/.calc_ans") : ".calc_ans")
 #define HIST_FILE (getenv("HOME") ? strcat(strcpy(malloc(strlen(getenv("HOME")) + 16), getenv("HOME")), "/.calc_history") : ".calc_history")
 
-void save_ans(double ans)
+void save_ans(long double ans)
 {
     FILE *file = fopen(ANS_FILE, "w");
     if (file)
@@ -12,9 +12,9 @@ void save_ans(double ans)
     }
 }
 
-double get_ans()
+long double get_ans()
 {
-    double ans = 0.0;
+    long double ans = 0.0;
     FILE *file = fopen(ANS_FILE, "r");
     if (file)
     {
@@ -74,7 +74,7 @@ void show_history()
     }
 }
 
-int is_valid_input(const char *input, double *num1, char *oper, double *num2)
+int is_valid_input(const char *input, long double *num1, char *oper, long double *num2)
 {
     char temp[MAX_LINE];
     strcpy(temp, input);
@@ -133,7 +133,7 @@ int is_valid_input(const char *input, double *num1, char *oper, double *num2)
     return 1;
 }
 
-double calculate_result(double num1, char oper, double num2, char *error_msg)
+long double calculate_result(long double num1, char oper, long double num2, char *error_msg)
 {
     switch (oper)
     {
@@ -171,7 +171,7 @@ void clear_screen()
 int main()
 {
     char input[MAX_LINE];
-    double num1, num2, result;
+    long double num1, num2, result;
     char oper, error_msg[MAX_LINE] = "";
 
     while (1)
@@ -217,7 +217,7 @@ int main()
                     result = calculate_result(num1, oper, num2, error_msg);
                     if (strcmp(error_msg, "") == 0)
                     {
-                        result = (double)((long long)(result * 100 + 0.5)) / 100.0;
+                        result = (long double)((long long)(result * 100 + 0.5)) / 100.0;
                         if (result == (long long)result)
                         {
                             printf("%lld\n", (long long)result);
