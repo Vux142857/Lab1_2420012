@@ -2,7 +2,7 @@ TARGET_EXEC := calc
 
 SRC_DIRS := .
 
-SRCS := $(shell find $(SRC_DIRS) -name '*.c')
+SRCS := calc.c
 
 OBJS := $(SRCS:.c=.o)
 
